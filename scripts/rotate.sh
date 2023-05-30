@@ -99,3 +99,23 @@ do
 done;
 
 echo "$(${log_prefix}) INFO: rotation finished";
+
+rclone_dir="${RCLONE_DIR}"
+
+echo "$(${log_prefix}) INFO: move /backup/ contabo-vps:/docker_dir/data/backup/${rclone_dir}";
+
+if [ ! -z "${rclone_dir}" ]; then
+    rclone move /backup/ contabo-vps:/docker_dir/data/backup/${rclone_dir} --transfers 10 --quiet
+
+#   rclone copy /images/ contabo-vps:/docker_dir/data/images/${rclone_dir} --transfers 10 --quiet
+#   echo "INFO: copy images backup finished ${rclone_dir}";
+#   rclone copy contabo-vps:/docker_dir/data/images/ docker_dir/data/images/ --p
+
+    if [ $? -eq 0 ]
+    then
+        echo "INFO: move db backup finished ${rclone_dir}";
+        curl --silent --output /dev/null --write-out "%{http_code}" https://uptime.betterstack.com/api/v1/heartbeat/jsPB6TrH3tfVi76fLwBVPDsW
+    else
+    echo "ERROR: move db backup error" >&2
+    fi
+fi
